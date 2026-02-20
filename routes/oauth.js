@@ -4,11 +4,20 @@ const airtable = require('../lib/airtable-oauth');
 const ebay = require('../lib/ebay-oauth');
 const { getAirtableTokens, getEbayTokens } = require('../lib/store');
 
+function getBaseUrl(req) {
+  const fromEnv = process.env.BASE_URL;
+  if (fromEnv && !fromEnv.includes('localhost')) return fromEnv;
+  return `${req.protocol}://${req.get('host')}`;
+}
+
 router.get('/airtable', (req, res) => {
   if (!process.env.AIRTABLE_CLIENT_ID || !process.env.AIRTABLE_CLIENT_SECRET) {
     return res.redirect('/?airtable_error=missing_credentials');
   }
-  const redirectUri = process.env.AIRTABLE_REDIRECT_URI;
+  const baseUrl = getBaseUrl(req);
+  const redirectUri = process.env.AIRTABLE_REDIRECT_URI?.includes('localhost')
+    ? `${baseUrl}/oauth/airtable/callback`
+    : (process.env.AIRTABLE_REDIRECT_URI || `${baseUrl}/oauth/airtable/callback`);
   const state = airtable.generateState();
   const codeVerifier = airtable.generateCodeVerifier();
   const codeChallenge = airtable.computeCodeChallenge(codeVerifier);
@@ -32,7 +41,10 @@ router.get('/airtable/callback', async (req, res) => {
     res.clearCookie('airtable_oauth');
     return res.redirect('/?airtable_error=no_code');
   }
-  const redirectUri = process.env.AIRTABLE_REDIRECT_URI;
+  const baseUrl = getBaseUrl(req);
+  const redirectUri = process.env.AIRTABLE_REDIRECT_URI?.includes('localhost')
+    ? `${baseUrl}/oauth/airtable/callback`
+    : (process.env.AIRTABLE_REDIRECT_URI || `${baseUrl}/oauth/airtable/callback`);
   if (!redirectUri) {
     res.clearCookie('airtable_oauth');
     return res.redirect('/?airtable_error=missing_redirect_uri');
