@@ -7,6 +7,7 @@ const oauthRoutes = require('./routes/oauth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,7 +29,7 @@ app.get('/api/status', async (req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+  const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
   const airtableError = req.query.airtable_error;
   const ebayError = req.query.ebay_error;
   const airtableOk = req.query.airtable === 'ok';
