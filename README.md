@@ -32,6 +32,21 @@ npm start
 
 Open `http://localhost:3000`. Use “Connect Airtable” and “Connect eBay” to authorize. Tokens are stored in `data/tokens.json`.
 
+## Deploy to Railway
+
+1. Create a new repo on GitHub (e.g. `airtable-ebay-connector`), then:
+   ```bash
+   cd airtable-ebay-connector
+   git remote add origin https://github.com/YOUR_USERNAME/airtable-ebay-connector.git
+   git push -u origin main
+   ```
+2. In [Railway](https://railway.app), **New Project** → **Deploy from GitHub repo** → select the repo.
+3. In the service, go to **Variables** and add all env vars from `.env` (use your Railway URL for `BASE_URL` and `AIRTABLE_REDIRECT_URI`; `EBAY_REDIRECT_URI` stays as your RuName).
+4. Update your Airtable and eBay OAuth apps to use the Railway callback URLs (see env vars above).
+5. Redeploy if needed. Open the generated Railway URL to use the app.
+
+**Note:** Tokens are stored in `data/tokens.json`. On Railway the filesystem is ephemeral, so tokens can be lost on redeploy. For production you’ll want to persist them (e.g. database or volume) later.
+
 ## Next (Phase 1.2+)
 
 - Config and field-mapping UI
