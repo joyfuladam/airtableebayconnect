@@ -29,7 +29,10 @@ app.get('/api/status', async (req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+  const envBase = process.env.BASE_URL;
+  const baseUrl = (envBase && !envBase.includes('localhost'))
+    ? envBase
+    : `${req.protocol}://${req.get('host')}`;
   const airtableError = req.query.airtable_error;
   const ebayError = req.query.ebay_error;
   const airtableOk = req.query.airtable === 'ok';
